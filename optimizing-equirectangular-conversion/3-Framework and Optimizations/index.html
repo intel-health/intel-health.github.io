@@ -47,7 +47,8 @@ when testing how fast a specific algorithm functions:
 </p>
 
 <p>
-The code found in the github repository <a href="https://github.com/intel-health/TODO-getfinallocation">OneDevice</a> implements the elements described above with some enhancements.  For instance,
+The code found in the github repository <a href="https://github.com/intel-health/optimizing-equirectangular-conversion/tree/main/EquiRectangular/src/DPC%2B%2B-OneDevice">OneDevice</a>
+implements the elements described above with some enhancements.  For instance,
 some of the algorithms being tested take longer during the first iteration due to a need to compile a kernel or pass the kernel to an accelerator in the system such as a GPU.  In cases such as
 video conversion, this "warmup iteration" happens at the very beginning and has a minor effect on the overall experience; however, for cases where the extraction happens on a single frame, 
 this warmup time may be significant.  To help distinguish between these two situations, the framework separates out the first iteration as a "warmup iteration" and then takes the average 
@@ -289,8 +290,9 @@ person using the program, but it gives a well defined metric to use when compari
 </p>
 
 <p>
-The same Intel&reg; i9-9900k machine was used to execute the program as was used in the <a href="TODO link to blog 2">previous blog</a> that introduced this code.  The yellow highlighted
-FPS (0.9273079) is approximately the same as the previous standalone results (0.89846216), so incorporating the code into the framework did not introduce substantial overhead.
+The same Intel&reg; i9-9900k machine was used to execute the program as was used in the 
+<a href="https://intel-health.github.io/optimizing-equirectangular-conversion/2-Existing%20360%20Degree%20Open%20Source/index.html">previous blog</a> that introduced this code.  The yellow highlighted
+FPS (0.9273079) is similar to the previous standalone results (0.89846216), so incorporating the code into the framework did not introduce substantial overhead.
 </p>
 
 <h2>Algorithm 1</h2>

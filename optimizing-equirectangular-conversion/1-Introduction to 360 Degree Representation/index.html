@@ -23,7 +23,9 @@
 The ability to capture and digitially represent the world around us continues to evolve.  A relatively recent development allows images and videos to capture an 
 entire panorama of 360 degrees horizontally and 180 degrees vertically.  These images and videos can be displayed on web pages such as this or on virtual reality headsets affording people
 that view to have an immersive view in the environment and "look around" to see any angle of the scene that is desired.
+</p>
 
+<p>
 For instance, in Figure 1 below, it initially appears as a standard two dimensional image; however, after selecting the image by clicking on it, it is possible to navigate 
 around the scene with the following keystrokes:
 <ul>
@@ -31,7 +33,15 @@ around the scene with the following keystrokes:
 <li>Up or down arrows - change the camera position up or down, also known as tilt.</li>
 <li>PgUp, PgDn, Home, End - change the roll of the camera in the event the original image was not taken with a level camera.</li>
 <li>* or / - change the field of view to be narrower or wider.</li>
-<li>Alternatively, it is also possible to use the mouse to click and drag the image to change the right/left/up/down positioning and the mouse scroll wheel changes the field of view.</li>
+</ul>
+</p>
+
+<p>
+Alternatively, it is also possible to use the mouse to:
+</p>
+<ul>
+<li>Place the mouse cursor over the image, press a mouse button down, and drag the image to change the right/left/up/down positioning
+<li>Use the mouse scroll wheel changes the field of view / zoom.
 </ul>
 
 <div class="Figure">
@@ -54,19 +64,18 @@ Figure 2, below, shows the raw image containing all the pixel data for represent
 </p>
 
 <p>
-There are multiple ways to represent
-all the data for a 360 degree image.  The format shown in Figure 2 is referred to as the equirectangular format.  The mathematical conversion from the 360 view to the
-equirectangular format makes human understanding of the image challenging.  The remainder of this section explains the conversion process for the equirectangular format.
+Multiple file format representations exist for a 360 degree image.  The format shown in Figure 2 is referred to as the equirectangular format.  The mathematical conversion from the 360 view to the
+equirectangular format makes human understanding of the equirectangulare image challenging.  The remainder of this section explains the conversion process for the equirectangular format.
 </p>
 
 <p>
 To shoot this scene, a 360 degree camera was placed on a tripod which was situated with the edge of a road running directly underneath the camera.
 This can be seen by changing the Figure 1 view to look directly downwards to see the road below.  The primary lens of the camera was facing the
-fenced yard with the road extending directly to the left and right of the camera.  Directly behind the camera was the road and then a meadow on the other side of the road.
+fenced yard with the road extending straight out to the left and right of the camera.  Directly behind the camera was the road and then a meadow on the other side of the road.
 </p>
 
 <p>
-Further down in this post, additional visualization techniques are used to help understand why the road appears to get folded in half.
+Further down in this post, additional visualization techniques are used to explain why the road appears to get folded in half.
 </p>
 
 <div class="Figure">
@@ -81,7 +90,7 @@ Figure 2: The equirectangular representation of data for Figure 1
 <h1>Representations of 360 Images and Videos</h1>
 
 <p>
-There are two common formats used when working with 360 degree images: 1) Equirectangular, and 2) Cubemap.
+Two common formats exist for storing 360 degree images: 1) Equirectangular, and 2) Cubemap.
 </p>
 
 <h2>Equirectangular Format</h2>
@@ -94,11 +103,17 @@ horizontal coverage is twice as much as the vertical coverage.
 </p>
 
 <p>
-In cases like this blog, the images used are controlled and known to be panorama images.  In other instances where a person provides a pointer to an image
+In cases like this blog, the images used are controlled and known to be equirectangular (also known as panorama) images.  In other instances where a person provides a pointer to an image
 to load, the code must make a determination on whether the image represents a panorama image or not.  One option is to use the 2:1 ratio to "guess" whether
 the provided image is a panaorama.  Better yet, the code can examine the metadata within the image file to check if the image has been tagged as a
-panorama image.  https://exiv2.org/tags-xmp-GPano.html defines the eXtensible Metadta Platform (XMP) section (https://www.adobe.com/devnet/xmp.html) of an image that corresponds 
-to images that use the GPano properties.  The ProjectionType property defines the storage layout and is set to equirectangular for panorama images.
+panorama image.  <a href="https://exiv2.org/tags-xmp-GPano.html">https://exiv2.org/tags-xmp-GPano.html</a> defines the eXtensible Metadta Platform (XMP) 
+section (<a href="https://www.adobe.com/devnet/xmp.html">https://www.adobe.com/devnet/xmp.html</a>) of an image that corresponds 
+to images that use the GPano properties.  The ProjectionType property defines the storage layout.  A value of equirectangular informs software to treat the
+image as equirectangular.
+</p>
+
+<p>
+A description of the fields can be found in <a href="https://exiv2.org/tags-xmp-GPano.html">https://exiv2.org/tags-xmp-GPano.html</a>
 </p>
 
 <p>
@@ -109,9 +124,9 @@ For instance, the metadata for Figure 2 is:
 <x:xmpmeta 
   xmlns:x="adobe:ns:meta/" x:xmptk="XMP Core 4.4.0-Exiv2">
   <rdf:RDF
-    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    xmlns:rdf="<a href="http://www.w3.org/1999/02/22-rdf-syntax-ns#">http://www.w3.org/1999/02/22-rdf-syntax-ns#</a>>
     <rdf:Description rdf:about=""
-      xmlns:GPano="http://ns.google.com/photos/1.0/panorama/" 
+      xmlns:GPano="<a href="http://ns.google.com/photos/1.0/panorama/">http://ns.google.com/photos/1.0/panorama/</a> 
       GPano:UsePanoramaViewer="True" 
       GPano:ProjectionType="equirectangular" 
       GPano:CroppedAreaImageWidthPixels="11968" 
@@ -157,10 +172,11 @@ Figure 4: View from Inside the Sphere Created from Data in Figure 3
 </div> 
 
 <p>
-Figures 5, 6, 7, and 8 below set the yaw and roll at 0 degrees, the field of view at 60 degrees, and vary the tilt to 0, 45, 75, and 90 degrees, respectively.  The
+Figures 5, 6, 7, and 8 below set the yaw and roll at 0 degrees, the field of view at 60 degrees, and vary the tilt to 0, 45, 74, and 90 degrees, respectively.  The
 upper left image shows the rectilinear view as viewed from inside the sphere, the lower left image illustrates the bounding box surrounding the image pixels are extracted
 from the equirectangular image, and the right image shows the field of view when projected onto the sphere.  The right hand view was generated from the lower left data
-using a slightly modified version of code found in the first answer in https://stackoverflow.com/questions/30265375/how-to-draw-orthographic-projection-from-equirectangular-projection.
+using a slightly modified version of code found in the first answer in
+<a href="https://stackoverflow.com/questions/30265375/how-to-draw-orthographic-projection-from-equirectangular-projection">https://stackoverflow.com/questions/30265375/how-to-draw-orthographic-projection-from-equirectangular-projection</a>.
 The code was modified since several of the calls used in the original code have been deprecated and removed and only a single frame is created instead of creating
 the cool gif image shown in the answer.
 </p>

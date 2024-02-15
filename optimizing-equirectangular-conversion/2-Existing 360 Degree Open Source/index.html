@@ -47,8 +47,11 @@ Open Source C++ Code
 </h2>
 
 <p>
-The first code considered originates from https://github.com/rfn123/equirectangular-to-rectlinear/tree/master. The author notes that the code is not optimized to be efficient, 
-but has a nice explanation for the algorithm that is used and references a book for further details. 
+The first code considered originates from <a href="https://github.com/rfn123/equirectangular-to-rectlinear/tree/master">https://github.com/rfn123/equirectangular-to-rectlinear/tree/master</a>. The author notes that the code is not optimized to be efficient, 
+but has a nice explanation for the algorithm that is used and references a book for further details.  This code base was forked into 
+<a href="https://github.com/intel-health/equirectangular-to-rectlinear">https://github.com/intel-health/equirectangular-to-rectlinear</a> to add the code
+to report timing information.  To reduce dependencies on YAML, the code was also modified to remove the YAML configuration and simply select some known
+values.
 </p>
 
 <p>
@@ -140,9 +143,11 @@ Open Source Python Code
 </h2>
 
 <p>
-Another interesting implementation comes from https://github.com/fuenwang/Equirec2Perspec. This code uses the Python language for implementation along with OpenCV for reading 
+Another interesting implementation comes from <a href="https://github.com/fuenwang/Equirec2Perspec">https://github.com/fuenwang/Equirec2Perspec</a>. This code uses the Python language for implementation along with OpenCV for reading 
 the image and performing image operations. As with the C++ code above, the author of the Python code nicely encapsulates the core algorithm in a class.  The Github ReadMe.md
-file shows a sample usage of that function.
+file shows a sample usage of that function.  This code base was forked into 
+<a href="https://github.com/intel-health/Equirec2Perspec">https://github.com/intel-health/Equirec2Perspec</a> to add the code
+to report timing information.  A new file RunEquirec2Perspec.py implements the timing portion and calls an instance of the original Equirectangular class.
 </p>
 
 <h3>
@@ -369,8 +374,8 @@ view from a 360 panoramic image.
 
 <p>
 The remainder of this blog series introduces a framework for testing different algorithm variations, continues exploring tools available to determine inefficiencies 
-in the algorithms, and then proposes code changes to minimize the amount of time for extracting a given field of view from an equirectangular frame. [TODO: Update this paragraph 
-after full structure is understood and possibley move the following sentence to another blog] The efficiency assessments consider two cases: 1) where the field of view moves over a 
+in the algorithms, and then proposes code changes to minimize the amount of time for extracting a given field of view from an equirectangular frame.
+The efficiency assessments consider two cases: 1) where the field of view moves over a 
 equirectangular image, and 2) where the field of view stays in the same spot while the underlying image changes (e.g., for working with a video stream). 
 </p>
 
