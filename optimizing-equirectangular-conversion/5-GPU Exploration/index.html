@@ -16,16 +16,16 @@
 <h1>GPU Exploration</h1>
 
 <p>
-The previous blog, <a href="https://intel-health.github.io/optimizing-equirectangular-conversion/4-Parallel%20Optimizations/index.html">Execution Framework and Parallel Code Optimizations</a>, utilized parallel processing to increase
-the algorithm speed significantly.  Graphics Processing Units (GPUs) excel at doing parallel calculations so it is worth exploring if a GPU that is
+The previous blog, <a href=https://intel-health.github.io/optimizing-equirectangular-conversion/4-Parallel%20Optimizations/index.html>Execution Framework and Parallel Code Optimizations</a>, utilized parallel processing to increase
+the algorithm speed significantly.  Graphics Processing Units (GPUs) excel at doing parallel calculations, so it is worth exploring if a GPU 
 integrated with the CPU or a discrete, stand-alone GPU could further enhance the execution speed of the algorithms.  Data Parallel C++ and
-oneAPI make it easier to explore executing an algorithm on different pieces of hardware such as CPU, integrated GPU, discrete GPU, and other hardware
+oneAPI make it easy to explore executing an algorithm on different pieces of hardware such as CPU, integrated GPU, discrete GPU, and other hardware
 such as Field Programmable Gate Array (FPGA).
 </p>
 
 <p>
-Recall from the previous blog that algorithms 5 - 11 are floating point 64 and algorithms 12 - 18 are equivalent floating point 32 variants.  These two variations are
-used interchangably in the descriptions below.
+Recall from the previous blog that algorithms 5 - 11 are floating point 64, and algorithms 12 - 18 are equivalent floating point 32 variants.  These two variations are
+used interchangeably in the descriptions below.
 </p>
 
 <h2>Targting the GPU with OneDevice.exe</h2>
@@ -33,15 +33,15 @@ used interchangably in the descriptions below.
 <p>
 Since the framework implemented flags for specifying the target device (see previous blog discussion of command line flags type_preference, platform, device_name,
 and driver_version), the same OneDevice executable can be utilized to run many of the algorithms on an integrated or discrete GPU; however, this blog series only
-reports on integrated GPU usage.  Algorithms 0 - 4 utilize standard C++ code constructs so those algorithms always execute on the CPU regardless of the
+reports on integrated GPU usage.  Algorithms 0 - 4 utilize standard C++ code constructs, so those algorithms always execute on the CPU regardless of the
 settings of the four flags; thus, only algorithms 5 - 11 are discussed here.
 </p>
 
 <p>
-The results below report on the frames per second for all six of the algorithms when using a single equirectangular image and changing the yaw by 10 degrees with each iteration.
+The results below report on the frames per second for all six algorithms when using a single equirectangular image and changing the yaw by 10 degrees with each iteration.
 For these cases, the platform OpenCL was selected.  The same commands can be run using the --platform=Level-Zero for interacting with the GPU instead.  In 2020 when
-oneAPI initially launched only the OpenCL backend platform was available.  Later, the Level-Zero backend was introduced.  For the code generated here, both
-backends perform about the same, so this blog only shows the OpenCL results.
+oneAPI initially launched only the OpenCL backend platform was available.  Later, the Level-Zero backend was introduced.  Both
+backends perform about the same for the code generated here, so this blog only shows the OpenCL results.
 </p>
 
 <code>
@@ -131,19 +131,19 @@ total averaging, 1001,                  Total,  0.00197066,s,     1.97066,ms,   
 <p>
 For the scenario where the viewing position moves while the image remains constant, algorithm 10 (or 17) performs well.  Algorithm 11 (or 18) shows equal performance since the target device
 is not the CPU so the data copy into the shared memory happens equally for both algorithms.  Algorithms 5 - 9 (or 12 - 16) all utilize cv::remap to extract the rectilinear image 
-from the equirectangular image so this does not benefit from Data Parallel C++ coding and executes on the CPU rather than the GPU.
+from the equirectangular image, so this does not benefit from Data Parallel C++ coding and executes on the CPU rather than the GPU.
 </p>
 
 <p>
-Figure 1, below, shows a zoomed in VTune trace of the start of execution of Algorith 17 (or 10) when the viewing direction changes with each iteration.  At the far left (and extended to
-the left beyond the zoomed area) is the initial call to FrameCalculations which submits the kernel to do the calculations.  This causes clBuidProgram to compile all the kernels for
-the target device, creates the kernel, and then executes the kernel.  This falls under the "warmup" iteration in the reports above.  The first call to ExtractFrameImage creates
-that kernel and executes it (also in the warmup time).  After that, the remainder of the calls to FrameCalculations and ExtractFrameImage are much faster as shown towards the right of
-the zoomed area and as highlighted in the VTune selection, the remainder of the frames take just over 1 millisecod which correlates to the times shown above for --algorithm=10 at 1.229 ms.
+Figure 1, below, shows a zoomed-in Intel&reg; VTune&trade; trace of the start of execution of Algorithm 17 (or 10) when the viewing direction changes with each iteration.  At the far left (and extended to
+the left beyond the zoomed area) is the initial call to FrameCalculations, which submits the kernel to do the calculations.  This causes clBuidProgram to compile all the kernels for
+the target device, create the kernel, and then execute the kernel.  This falls under the "warmup" iteration in the reports above.  The first call to ExtractFrameImage creates
+that kernel and executes it (also in the warmup time).  After that, the remainder of the calls to FrameCalculations and ExtractFrameImage are much faster, as shown towards the right of
+the zoomed area. As highlighted in the VTune selection, the remaining frames take just over 1 millisecond, which correlates to the times shown above for --algorithm=10 at 1.229 ms.
 </p>
 
 <p>
-Notice, too, that the Copy Image happens a single time in the first ExtractFrameImage call.  After copying the data into universal shared memory, it does not need to be copied again.  This occurs since only the viewing perspective changes from call to call.
+Notice that the Copy Image happens once in the first ExtractFrameImage call.  After copying the data into universal shared memory, it does not need to be copied again.  This occurs since only the viewing perspective changes from call to call.
 </p>
 
 <div class="Figure">
@@ -154,7 +154,7 @@ Figure 1: Output from Algorithm 17 as Viewing Perspective Changes
 </div>
 
 <p>
-Conversely, if the image changes with each iteration and the viewing direction remains stable, then Algorithms 5 - 8 (or 12 - 15) perform the best as shown below.  
+Conversely, if the image changes with each iteration and the viewing direction remains stable, Algorithms 5 - 8 (or 12 - 15) perform the best, as shown below.  
 </p>
 
 <code>
@@ -242,8 +242,8 @@ total averaging, 1001,                  Total,  0.02628900,s,    26.28900,ms,   
 </code>
 
 <p>
-Figure 2 below shows VTune output from Algorithm 14 (or 7).  Algorithms 5 - 8 or (12 - 15) do the calculations for the view on the GPU a single time at startup
-(as seen by the Calc Kernel call on the left side of the VTune figure) and the remapping of those data points to the rectilinear image happen on the CPU each iteration 
+Figure 2 below shows the VTune output from Algorithm 14 (or 7).  Algorithms 5 - 8 or (12 - 15) do the calculations for the view on the GPU a single time at startup
+(as seen by the Calc Kernel call on the left side of the VTune figure), and the remapping of those data points to the rectilinear image happen on the CPU each iteration 
 so the large images remain local to the CPU thereby saving the copy time.  
 </p>
 
@@ -255,8 +255,8 @@ Figure 2: Output from Algorithm 14 as Image Changes
 </div>
 
 <p>
-When the image changes with each iteration while using algorithms 9 - 11 (or 16 - 18), the full equirectangular image must be copied to the shared memory every time as shown in Figure 3 below.  This
-adds around 12 milliseconds to each iteration and has a large impact on the frames per second that can be computed since the test images are 11,968 x 5,984 pixels thereby 
+When the image changes with each iteration while using algorithms 9 - 11 (or 16 - 18), the full equirectangular image must be copied to the shared memory every time, as shown in Figure 3 below.  This
+adds around 12 milliseconds to each iteration and greatly impacts the frames per second that can be computed since the test images are 11,968 x 5,984 pixels, thereby 
 requiring a lot of data to get copied.
 </p>
 
@@ -276,20 +276,20 @@ the code according to the hardware features, considering optimal ways to access 
 <h2>Dividing work between CPU and GPU</h2>
 
 <p>
-Everything up until this point has targeted a single device at a time.  Wouldn't it make sense to execute on both the CPU and GPU simultaneously?  One of the tag lines
+Everything up until this point has targeted a single device at a time.  Might executing on both the CPU and GPU simultaneously make sense?  One of the tag lines
 used with oneAPI says "No Transistor Left Behind", so how can the code be changed to send some work to the CPU and simultaneously some work to the integrated GPU?  This turned out
 to be a larger code change than originally expected.  The original hope was to submit work to one device without a queue wait() call and then submit the next set of work to the other
-device and then wait() for either to complete, submit the next work to the device(s) that completed, and continue.  However, an API call to wait() for multiple queues
-simultaneously could not be found (please post a comment if there is one).  Therefore, the code was altered to run two standard C++ threads and the primary thread
-doles out work to the sub-threads and each sub-thread manages one of the two devices and thus can wait() without blocking the other thread's execution.  The main thread uses
+device and then wait() for either to complete, submit the next work to the device(s) that completed, and continue.  However, an Application Programming Interface (API) call to wait() for multiple queues
+simultaneously could not be found (please post a comment if there is one).  Therefore, the code was altered to run two standard C++ threads, and the primary thread
+doles out work to the sub-threads, and each sub-thread manages one of the two devices and thus can wait() without blocking the other thread's execution.  The main thread uses
 condition variables and mutexes to pass information back and forth between the three threads.  This code can be found in the TwoDevices solution.  Since TwoDevices depends on oneAPI / DPC++,
 thus, only algorithms 5 - 19 are supported (algorithm 19 is introduced later in this blog).
 </p>
 
 <p>
 Executing the OneDevice code with algorithm 17 (or 10) results in the following output when running on the CPU and changing the image with each iteration.  Algorithm 17 was
-utilzed since algorithm 18 favors the CPU since it does not actually copy the images to universal shared memory and since TwoDevices must copy the data at least to the GPU,
-it seemed reasonable to try to make the amount of work required by each program to be as similar as possible.
+utilized since algorithm 18 favors the CPU since it does not copy the images to universal shared memory. Since TwoDevices must copy the data at least to the GPU,
+it seemed reasonable to try to make the amount of work required by each program as similar as possible.
 </p>
 
 <div class="ExecutionResults">
@@ -309,9 +309,9 @@ total averaging, 1001,                  Total,  0.02440282,s,    24.40282,ms,   
 </code>
 
 <p>
-Executing the TwoDevices code with the same configuration outputs the following.  Looking at the ALL times averaging line shows that collectively the CPU and GPU were able
-to execute at 116 FPS.  The CPU did 71 FPS and the GPU did nearly 45 FPS.  While the higher FPS is a fantastic result, there seemed to be something amiss as well.  Notice
-that the CPU FPS is higher than it was for OneDevice.  That should not be possible so further investigation was needed.
+Executing the TwoDevices code with the same configuration outputs the following.  Looking at the ALL times averaging line shows that the CPU and GPU were collectively able
+to execute at 116 FPS.  The CPU did 71 FPS, and the GPU did nearly 45 FPS.  While the higher FPS is a fantastic result, there seemed to be something amiss.  Notice
+that the CPU FPS is higher than it was for OneDevice.  That should not be possible, so further investigation was needed.
 </p>
 
 <div class="ExecutionResults">
@@ -343,14 +343,14 @@ All,total averaging, 1001,                  Total,0.018361,s,    18.36073,ms,   
 </code>
 
 <p>
-VTune to the rescue!  Full disclosure, the VTune figure was captured when both --deltaImage and --deltaYaw=10 were set, but the root cause remains the same even when only --deltaImage is used.
-Figure 4 zooms in on the code execution that explains the above results.  Notice on the left that CPU and GPU orchestrator threads both kick off working on a frame
-and they both copy the image prior to extraction.  However, due to a left over optimization from OneDevice, the TwoDevices code essentially cheats.  Assume at the far left that the CPU receives
-image 0 and the GPU receives image 1.  The first light blue box for the CPU represents the starting of calculating the frame's view port.  That means the CPU completed working on image 0 and
-the main thread gave it the next round of work which would be image 0 (again) since the GPU received image 1.  Thus, the CPU does not need to make a copy since it received the same index
-again.  It finishes that work quickly and receives image 1 from the main thread, so now the long, dark blue bar indicates the copy was made.  Meanwhile, the GPU completes its work and
-receives image 0 this time.  Since it had image 1 last time, it also must make a copy.  In the center of the figure, both the CPU and GPU can skip copying since at least for that moment
-they are getting the same image they already had.  A little later, they are given an image they did not have requiring them to make a copy.  This allows the CPU to perform faster in the
+VTune to the rescue!  Full disclosure: the VTune figure was captured when both --deltaImage and --deltaYaw=10 were set, but the root cause remains the same even when only --deltaImage is used.
+Figure 4 zooms in on the code execution that explains the above results.  Notice on the left that the CPU and GPU orchestrator threads both kick off working on a frame, 
+and they both copy the image before extraction.  However, due to a leftover optimization from OneDevice, the TwoDevices code essentially cheats.  Assume at the far left that the CPU receives
+image 0 and the GPU receives image 1.  The first light blue box for the CPU represents the start of calculating the frame's viewport.  That means the CPU completed working on image 0, and
+the main thread gave it the next round of work, which would be image 0 (again) since the GPU received image 1.  Thus, the CPU does not need to make a copy since it receives the same index
+again.  It finishes that work quickly and receives image 1 from the main thread, so now the long, dark blue bar indicates a copy was made.  Meanwhile, the GPU completes its work and
+receives image 0 this time.  Since it had image 1 last time, it also must make a copy.  In the center of the figure, both the CPU and GPU can skip copying since, at least for that period,
+they are getting the same image they already had.  A little later, they are given an image they did not have, requiring them to make a copy.  This allows the CPU to perform faster in the
 TwoDevices code when compared to the OneDevice code.
 </p>
 
@@ -362,7 +362,7 @@ Figure 4: Output from TwoDevices Algorithm 17 as Image Changes
 </div>
 
 <p>
-To make TwoDevices more comparable to OneDevice, --algorithm=19 was added to the code base.  If the --deltaImage flag is set, then an image copy is always made regardless of whether the device already
+To make TwoDevices more comparable to OneDevice, --algorithm=19 was added to the code base.  If the --deltaImage flag is set, an image copy is always made regardless of whether the device already
 has that image in its memory.  
 </p>
 
@@ -384,28 +384,25 @@ All,total averaging, 1001,                  Total,0.016175,s,    16.17494,ms,   
 </code>
 
 <p>
-Now the results appear more reasonable even with negligible speedup.  It seems likely that the code is memory speed constrained since much of the time that both the CPU and GPU
-operate, they are both copying data around in memory.  Later in this blog, the same code executes on a machine with higher memory performance and the overall speed increases by 50% versus
-OneDevice.  More research would be required to confirm this code is memory bandwidth constrained, but the current data suggests this to be true.
+Now, the results appear more reasonable even with negligible speedup.  It seems likely that the code is memory speed constrained since much of the time that the CPU and GPU
+operate, they copy data around in memory.  Later in this blog, the same code executes on a machine with higher memory performance, and the overall speed increases by 50% versus
+OneDevice.  More research would be required to confirm this code is memory bandwidth-constrained, but the current data suggests this to be true.
 </p>
 
 <p>
-Most likely further code optimizations remain possible.  For instance, looking closely at the VTune results of TwoDevices suggests that the GPU remains idle longer in the TwoDevices code
-versus the OneDevice code.  Due to using multiple threads and having them communicate with one another via mutexes and condition variables probably creates slight delays
-in handing more work to the GPU (or the CPU for that matter).  Each time the queue to the device becomes empty that device stops doing anything useful.  Since the DPC++
-queues can have more than one work item queued at a time, one possible resolution would be to add more than one frame at a time to the device queues.  That way, when they finish
-executing one work item, they can immediately begin on the next.
+Most likely, further code optimizations remain possible.  For instance, looking closely at the VTune results of TwoDevices suggests that the GPU remains idle longer in the TwoDevices code
+versus the OneDevice code.  Using multiple threads and having them communicate via mutexes and condition variables probably creates slight delays
+in handing more work to the GPU (or the CPU, for that matter).  Each time the queue to the device becomes empty, that device stops doing anything useful.  Since the DPC++
+queues can have more than one work item queued at a time; one possible resolution would be to add more than one frame at a time to the device queues.  That way, they can immediately begin on the next when they finish executing one work item.
 </p>
 
 <h2>Upgraded Hardware</h2>
 
 <p>
-An opportunity presented itself to upgrade the hardware being used to execute OneDevice and TwoDevices, so wanted to report on the results of that hardware upgrade briefly.
+An opportunity presented itself to upgrade the hardware being used to execute OneDevice and TwoDevices.
+The new machine is an Intel&reg; i9-12900 machine  with the following components:
 </p>
-
 <p>
-The new machine is an Intel&reg; i9-12900 machine, specifically<br>
-<br>
 Gigabyte Z690 ATX Alder Lake-S Desktop<br>
 Processor       12th Gen Intel&reg; Core&trade; i9-12900 2.40 GHz
 Installed RAM   128.0 GB (128 GB usable)<br>
@@ -415,25 +412,25 @@ Microsoft Visual Studio 2022
 </p>
 
 <p>
-A handy website for getting lots of details about any Intel processor is <a href="https://ark.intel.com/">https://ark.intel.com/</a>.  Searching for the two processors results in
-<a href="https://ark.intel.com/content/www/us/en/ark/products/186605/intel-core-i9-9900k-processor-16m-cache-up-to-5-00-ghz.html">https://ark.intel.com/content/www/us/en/ark/products/186605/intel-core-i9-9900k-processor-16m-cache-up-to-5-00-ghz.html</a> and <a href="https://ark.intel.com/content/www/us/en/ark/products/134597/intel-core-i912900-processor-30m-cache-up-to-5-10-ghz.html">https://ark.intel.com/content/www/us/en/ark/products/134597/intel-core-i912900-processor-30m-cache-up-to-5-10-ghz.html</a>.
+A handy website for getting lots of details about any Intel processor is <a href=https://ark.intel.com/>https://ark.intel.com/</a>.  Searching for the two processors results in
+<a href=https://ark.intel.com/content/www/us/en/ark/products/186605/intel-core-i9-9900k-processor-16m-cache-up-to-5-00-ghz.html>https://ark.intel.com/content/www/us/en/ark/products/186605/intel-core-i9-9900k-processor-16m-cache-up-to-5-00-ghz.html</a> and <a href=https://ark.intel.com/content/www/us/en/ark/products/134597/intel-core-i912900-processor-30m-cache-up-to-5-10-ghz.html>https://ark.intel.com/content/www/us/en/ark/products/134597/intel-core-i912900-processor-30m-cache-up-to-5-10-ghz.html</a>.
 
 <p>
-Using these pages, the i9-9900K has 8 Cores and 16 threads, 3.6 GHz frequency with max turbo frequency of 5.00 GHz, a 95 Watts Thermal Design Power, and uses DDR4-2666 memory.  The
-integrated GPU is Intel UHD Graphics 630 with a base frequency of 350 MHz and max frequency of 1.2 GHz.
+Using these pages, the i9-9900K has 8 Cores and 16 threads, 3.6 GHz frequency with a maximum turbo frequency of 5.00 GHz, a 95 Watts Thermal Design Power, and utilizes DDR4-2666 memory.  The
+integrated GPU is Intel UHD Graphics 630 with a base frequency of 350 MHz and a maximum frequency of 1.2 GHz.
 </p>
 
 <p>
-The i9-12900 has 16 cores (8 performance and 8 efficient) with 24 total threads.  In recent processors, there are two types of cores.  The performance cores handle heavy computing
+The i9-12900 has 16 cores (8 performance and 8 efficient) with 24 hardware threads.  In recent processors, there are two types of cores.  The performance cores handle heavy computing
 while the efficient cores are more energy efficient and handle the lighter tasks so the performance cores do not have to context switch to those tasks.
-The base frequency of the efficient cores is 1.8 GHz and a max frequency of 3.8 GHz.  The performance core's base frequency is 2.4 GHz with a max of 5.00 GHz.  These processors
-have a base power of 65 Watts supporting bursts up to 202 Watts.  The processors use DDR5 up to 4800 MT/s or DDR4 upto 3200 MT/s.  The integrated GPU is Intel UHD Graphics 770 with
-base frequency of 300 MHz and maximum of 1.55 GHz.
+The base frequency of the efficient cores is 1.8 GHz, and the maximum frequency is 3.8 GHz.  The performance core's base frequency is 2.4 GHz with a max of 5.00 GHz.  These processors
+have a base power of 65 Watts, supporting bursts up to 202 Watts.  The processors use DDR5 up to 4800 MT/s or DDR4 up to 3200 MT/s.  The integrated GPU is Intel UHD Graphics 770 with
+a base frequency of 300 MHz and a maximum of 1.55 GHz.
 </p>
 
 <p>
 Running OneDevice on the CPU and adjusting the viewing perspective for each iteration results in the following output.  The 1275 FPS executes about 30% faster than the i9-9900K
-(963.7175386 / 1274.997944 = 1.322999627).  Alterting the image and changing both the image and the viewing perspective also show a 30+% improvment in speed with 36 and 39%, respectively.
+(963.7175386 / 1274.997944 = 1.322999627).  Altering the image and changing both the image and the viewing perspective also show a 30+% improvement in speed with 36 and 39%, respectively.
 </p>
 
 <div class="ExecutionResults">
@@ -449,7 +446,7 @@ total averaging, 1001,                  Total,  0.00115619,s,     1.15619,ms,   
 
 <p>
 Running OneDevice on the GPU and adjusting the viewing perspective for each iteration results in the following output.  The 1033 FPS executes about 20% faster than the i9-9900K
-(866.5268355 / 1033.690661 = 1.192912462).  Altering the image shows a 27% improvement and altering the image and viewing perspective improves by 28%.  Thus, overall the newer
+(866.5268355 / 1033.690661 = 1.192912462).  Altering the image shows a 27% improvement, and altering the image and viewing perspective improves by 28%.  Thus, the newer
 processor performs better with a lower base power draw.
 </p>
 
@@ -465,8 +462,8 @@ total averaging, 1001,                  Total,  0.00113022,s,     1.13022,ms,   
 </code>
 
 <p>
-One result that was extra interesting is how the TwoDevices code ran.  On the Intel i9-9900K there was a minimal improvement when executing the --deltaYaw=10 on two devices versus
-one device. However, with the i9-12900 there is a marked improvement of 51% using algorithm 19 (2102.2293626 / 1391.6927044 = 1.5105).
+One extra interesting result is how the TwoDevices code ran.  There was minimal improvement on the Intel i9-9900K when executing the --deltaYaw=10 on two devices versus
+one device. However, with the i9-12900, there is a marked improvement of 51% using algorithm 19 (2102.2293626 / 1391.6927044 = 1.5105).
 </p>
 
 <div class="ExecutionResults">
@@ -498,8 +495,8 @@ All,total averaging, 1001,                  Total,0.000829,s,     0.82933,ms,   
 </code>
 
 <p>
-For the case where the image changes with each iteration, the results on the i9-12900 are below and represents a speedup of 33% (105.0773895 / 78.7852222 = 1.33371).  This
-supports the earlier hypothesis that the code is memory bandwidth bound, since this computer has DDR5 4800 memory and performs better concurrently.
+For the case where the image changes with each iteration, the results on the i9-12900 are below and represent a speedup of 33% (105.0773895 / 78.7852222 = 1.33371).  This
+supports the earlier hypothesis that the code is memory bandwidth bound since this computer has DDR5 4800 memory and performs better concurrently.
 </p>
 
 <div class="ExecutionResults">
@@ -531,8 +528,8 @@ All,total averaging, 1001,                  Total,0.009856,s,     9.85606,ms,   
 </code>
 
 <p>
-Figure 5 below shows a zoomed in view of VTune
-as the code operates.  Note the large overlap in the Copy Image to USM operations between the CPU and GPU which would both be contending for the same memory.
+Figure 5 below shows a zoomed-in view of VTune
+as the code operates.  Note the large overlap in the Copy Image to USM operations between the CPU and GPU, which would both be contending for the same memory.
 </p>
 
 <div class="Figure">
@@ -548,13 +545,13 @@ Conclusion
 
 <p>
 This blog covered running the code on the integrated GPU and discussed how the amount of data required to transfer from CPU to GPU impacts the overall performance.
-Next, new code showed how to target two devices in the system simultaneous, but also pointed out system limitations that may constrain the amount of upside this brings
+Next, the new code showed how to target two devices in the system simultaneously but also pointed out system limitations that may constrain the amount of upside this brings
 to the overall performance.  Finally, a newer machine performed better despite a lower base power budget.  This machine also supported the hypothesis memory bandwidth
 constrains the overall code performance.
 </p>
 
 <p>
-VTune provided numerous insights into the code and not only helped find optimization points, but also helped visualize algorithm errors so those could be corrected.
+VTune provided numerous insights into the code and helped find optimization points, but it also helped visualize algorithm errors so those could be corrected.
 </p>
 
 <h2>
@@ -567,11 +564,21 @@ About the Author
 <img src="../images/author.jpg"></img>
 </td>
 <td>
-Doug Bogia received his Ph.D. in computer science from University of Illinois, Urbana-Champaign and currently works at Intel Corporation.
+Doug Bogia received his Ph.D. in computer science from the University of Illinois, Urbana-Champaign, and works at Intel Corporation.
 He enjoys photography, woodworking, programming, and optimizing solutions to run as fast as possible on a given piece of hardware.
 </td>
 </tr>
 </table>
+
+<a href=https://www.intel.com/LegalNoticesAndDisclaimers>Legal Notices and Disclaimers</a>
+
+<p>
+&copy; Intel Corporation.  Intel, the Intel logo, VTune, and other Intel marks are trademarks of Intel Corporation or its subsidiaries.  Other names and brands may be claimed as the property of others.
+</p>
+
+<p>
+The products described may contain design defects or errors known as errata which may cause the product to deviate from published specifications.  Current characterized errata are available on request.
+</p>
 
 </body>
 </head>

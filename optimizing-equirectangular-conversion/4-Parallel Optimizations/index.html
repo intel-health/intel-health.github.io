@@ -16,32 +16,32 @@
 <h1>Execution Framework and Parallel Code Optimizations</h1>
 
 <p>
-The previous blog, <a href="https://intel-health.github.io/optimizing-equirectangular-conversion/3-Framework%20and%20Optimizations/index.html">Execution Framework and Serial Code Optimizations</a>, described a series of improvements for C++ code that extracts a rectilinear view
-from an equirectangular image.  This blog explores converting the code from serial processing to parallel processing to optimize the extraction further.
+The previous blog, <a href=https://intel-health.github.io/optimizing-equirectangular-conversion/3-Framework%20and%20Optimizations/index.html>Execution Framework and Serial Code Optimizations</a>, described a series of improvements for C++ code that extracts a rectilinear view
+from an equirectangular image.  This blog explores converting the code from serial to parallel processing to optimize the extraction further.
 </p>
 
 <h2>Introduction to Intel&reg; oneAPI Base Toolkit (Base Kit)</h2>
 
 <p>
-The Khronos group created an industry standard specification called SYCL (pronounced Sickle) which allows programmers to express data parallelism and reuse code across multiple hardware
-targets such as CPU, GPU, or FPGA).  SYCL extends ISO standard C++ (version 17 and up) allowing many developers to work with a familiar language and become productive very quickly.
-Compilers exist for multiple vendors' hardware platforms meaning that code written using SYCL reduces the amount of vendor lock-in.
+The Khronos group created an industry-standard specification called SYCL (pronounced Sickle), allowing programmers to express data parallelism and reuse code across multiple hardware
+targets such as CPU, GPU, or FPGA).  SYCL extends ISO standard C++ (version 17 and up), providing many developers with a familiar language and development environment.
+Compilers exist for multiple vendors' hardware platforms, meaning that code written using SYCL reduces the amount of vendor lock-in.
 </p>
 
 <p>
-Intel created the Intel&reg; oneAPI Base Toolkit (Base Kit) which embodies all the tools and libraries required to write in SYCL. Intel refers to the language as Data Parallel C++ (DPC++).
+Intel created the Intel&reg; oneAPI Base Toolkit (Base Kit), which embodies all the tools and libraries required to write in SYCL. Intel refers to the language as Data Parallel C++ (DPC++).
 The toolkit(s) are available for no fee from 
-<a href="https://www.intel.com/content/www/us/en/developer/tools/oneapi/toolkits.html">https://www.intel.com/content/www/us/en/developer/tools/oneapi/toolkits.html</a>.  The tool kit
-integrates into Microsoft Visual Studio and Eclipse IDE allowing developers to continue using those familiar development environments, if desired.  The Base Toolkit includes the DPC++ compiler,
-VTune and Advisor that have been discussed previously in this series, as well as highly optimized libraries such as Math Kernel Library, Thread Building Blocks, Video Processing Library, 
+<a href=https://www.intel.com/content/www/us/en/developer/tools/oneapi/toolkits.html>https://www.intel.com/content/www/us/en/developer/tools/oneapi/toolkits.html</a>.  The tool kit
+integrates into Microsoft Visual Studio and Eclipse IDE allowing developers to continue using those familiar development environments if desired.  The Base Toolkit includes the DPC++ compiler,
+Intel&reg; VTune&trade;, and Intel&reg; Advisor discussed previously in this series, as well as highly optimized libraries such as Math Kernel Library, Thread Building Blocks, and Video Processing Library, 
 in addition to many others.
 </p>
 
 <h2>Introduction to Hardware Selection</h2>
 
 <p>
-The code in ConfigurableDeviceSelector.cpp enables code to request work queues that are directed to specific types or units of hardware for code execution.
-A list of all platforms and devices available on a particular system can be listed with a command line flag as shown below.  These results are for the Intel&reg; i9-9900k
+The code in ConfigurableDeviceSelector.cpp enables code to request work queues directed to specific hardware types for code execution.
+All platforms and devices on a particular system can be listed with a command line flag, as shown below.  These results are for the Intel&reg; i9-9900k
 that has been used for executing all the code in this blog series.
 </p>
 
@@ -107,23 +107,23 @@ Platform:                     Intel(R) Level-Zero
 </code>
 
 <p>
-The ConfigurableDeviceSelector class has a class function called set_search which sets the search parameters for the device selector.  The arguments are:
+The ConfigurableDeviceSelector class has a class function called set_search, which sets the search parameters for the device selector.  The arguments are:
 <ul>
 <li>
-type_preference - a string specifying a filter of sorts for which type of device to select.  Options include CPU, GPU, ACC (which often means an FPGA).
-If there are multiple acceptable types separate each type with a semicolon (i.e. CPU;GPU)
+type_preference - a string specifying a filter for which type of device to select.  Options include CPU, GPU, and ACC (which often means an FPGA).
+If there are multiple acceptable types, separate each type with a semicolon (i.e., CPU;GPU)
 </li>
 <li>
-platform - a string specifying the platform name to select.  If this is an empty string, then any platform is acceptable.  If the full string is found
-anywhere within the platform name, it is considered a match.  That is, "Zero" would be sufficient to match the final platform in the output listed above.
+platform - a string specifying the platform name to select.  If this is an empty string, then any platform is acceptable.  It is considered a match if the full string is found
+anywhere within the platform name.  For example, "Zero" would be sufficient to match the final platform in the above output.
 </li>
 <li>
-device_name - a string specifying the device to select.  If this is an empty string, then any device is acceptable.  If the full string is found
-anywhere within the device name, it is considered a match.  That is, "Emulation" would be sufficient to match the FPGA in the output listed above.
+device_name - a string specifying the device to select.  If this is an empty string, then any device is acceptable.  It is considered a match if the full string is found
+anywhere within the device name.  For example, "Emulation" would be sufficient to match the FPGA in the above output.
 </li>
 <li>
-driver_version - a string specifying the driver version to select.  If this is an empty string, then any driver is acceptable.  If the full string is found
-anywhere within the driver_version, it is considered a match.
+driver_version - a string specifying the driver version to select.  If this is an empty string, then any driver is acceptable.  It is considered a match if the full string is found
+anywhere within the driver_version.
 </li>
 </ul>
 </p>
@@ -132,16 +132,16 @@ anywhere within the driver_version, it is considered a match.
 
 <p>
 The OneDevice.exe framework calls the ConfigurableDeviceSelector by passing the values from the --typePreference, --platformName,
---deviceName, and --driverVersion directly to the set_search function with two exceptions.  First, if the platformName or deviceName flag are equal to "all", then the code
-steps through all the platforms and/or devices to execute the code there.  Second, if the platformName or deviceName is list, then the code
-provides a list of all the platforms and devices that are available such as the listing shown above.
+--deviceName, and --driverVersion directly to the set_search function with two exceptions.  First, if the platformName or deviceName flag is equal to "all", then the code
+steps through all the platforms and/or devices to execute the code there.  Second, if the platformName or deviceName is “list”, the code
+provides a list of all available platforms and devices, such as the above listing.
 </p>
 
 <h2>Introduction to SYCL Device Queues</h2>
 
 <p>
 In SYCL, device queues represent the linkage between the program as it executes and the target device to utilize when running a specific chunk of code (also known as a kernel).
-Device queue creation involves a line of code that looks like the following.  In this case, the set_search passes the command line arguments to the ConfigurableDeviceSelector and
+Device queue creation involves a line of code that looks like the following.  In this case, the set_search passes the command line arguments to the ConfigurableDeviceSelector, and
 then the class's device_selector is called by the oneAPI framework with each platform and device to determine which to use.  The device_selector returns integer values for each
 call indicating whether the provided device is desired (a positive number) or not (a negative value).  The device that receives the highest positive value gets utilized.  
 After locating the best match for the device, a queue to that device gets created and any code utilizing that queue will be compiled and executed on the selected device.
@@ -199,27 +199,27 @@ In the parallel processing code, that same loop looks like the following.
 </code>
 
 <p>
-The submit function delivers the kernel (in this case a lambda expression) to the appropriate work queue.  The submitted kernel receives a sycl::handler object representing the
-command group handler.  This groups all the device specific data and commands together for use during the kernel execution.  The next line utilizes the parallel_for method
-to break the original 2D image up into a series of work items.  Each work item processes a single pixel.  The index for which pixel is assigned to a particular
-kernel execution is passed in via the item variable with index 0 being the y index and index 1 being the x index.  The kernel takes these values and locates the proper element
-to compute.  The wait() function after the loop waits for all parallel processing of pixels to complete prior to moving on through the remainder of the code in the algorithm.
-If there was other useful code to execute while the parallel processing is underway, the program could place this code between the submit and the wait and that would run
+The submit function delivers the kernel (in this case, a lambda expression) to the appropriate work queue.  The submitted kernel receives a sycl::handler object representing the
+command group handler.  This groups all the device-specific data and commands together for use during the kernel execution.  The next line utilizes the parallel_for method
+to break the original 2D image into a series of work items.  Each work item processes a single pixel.  The index for which pixel is assigned to a particular
+kernel execution is passed in via the item variable, with index 0 being the y index and index 1 being the x index.  The kernel takes these values and locates the proper element
+to compute.  After the loop, the wait() function waits for all parallel processing of pixels to complete before moving on through the remainder of the code in the algorithm.
+If there was other useful code to execute while the parallel processing is underway, the program could place this code between the submit and the wait. That would run
 in parallel with the code being executed by the SYCL device.
 </p>
 
 <h2>Algorithm 5</h2>
 
 <p>
-The previous blog covered algorithms 0 through 4 and this blog covers algorithms 5 through 11.  Algorithm 5 started from Algorithm 1 (which was a port to C++ of the Python algorithm) and
-changed it to utilize parallel processing and select which hardware to target for executing the code using the constructs describe above.  Once all the for loops were converted to parallel_for
+The previous blog covered algorithms 0 through 4 and this blog covers algorithms 5 through 11.  Algorithm 5 started from Algorithm 1 (a port to C++ of the Python algorithm) and
+changed it to utilize parallel processing and select which hardware to target for executing the code using the constructs described above.  Once all the for loops were converted to parallel_for
 equivalents, algorithm 5 execution results in the following frames per second.
 </p>
 
 <p>
 Note that the blog references algorithm numbers as provided on the command line via the --algorithm, --startAlgorithm, or --endAlgorithm flags.  Internally, the algorithms utilize
 classes named in a (hopefully) descriptive fashion.  Thus, --algorithm=5 maps to DpcppRemapping (which is essentially v1 of the Data Parallel C++ algorithms), 
---algorithm=6 maps to DpcppRemappingV2, and so on.  Thus in the print outs shown below the internal classname is used while the command line and blog references the external
+--algorithm=6 maps to DpcppRemappingV2, and so on.  Thus, the internal class name is used in the printouts shown below, while the command line and blog reference the external
 algorithm number.  In hindsight, it would have been better if these were all consistent.
 <p>
 
@@ -240,7 +240,7 @@ total averaging, 1001,                  Total,  0.00471534,s,     4.71534,ms,   
 As a reminder, running algorithm 1 with the same parameters provides the following results.  The serial code is faster for the warmup iteration since the parallel code takes more
 overhead to select the hardware (even though it results in being the same CPU), construct the queue, and then compile the kernel for the target hardware.  However, note that for every
 subsequent run, that overhead disappears and the parallel nature of the code provides a nice speed improvement (230.2310604 / 67.4700178 = 3.41x).  Thus, if the use case
-requires processing a single image each time the code is invoked, pick the serial algorithm.  If many frames are likely to be processed each time, the parallel algorithm should be considered.
+requires processing a single image each time the code is invoked, pick the serial algorithm.  The parallel algorithm should be considered if many frames will likely be processed each time.
 </p>
 
 <code>
@@ -258,26 +258,26 @@ total averaging, 1001,                  Total,  0.01483488,s,    14.83488,ms,   
 <h2>Algorithm 6</h2>
 
 <p>
-Algorithm 6 optimizes by taking all the separate invocations of kernels and combining the code into a single kernel much like Algorithm 4 did when combining the separate functions
-into a single function.  Compared to Algorithm 5, this provides a 35% speed up (311.4885092 / 230.2310604 = 1.35).
+Algorithm 6 optimizes by taking all the separate invocations of kernels and combining the code into a single kernel, much like Algorithm 4 did when combining the separate functions
+into a single function.  Compared to Algorithm 5, this provides a 35% speedup (311.4885092 / 230.2310604 = 1.35).
 </p>
 
 <p>
-Algorithm 6 has two variants.  The faster one utilizes Univerisal Shared Memory (USM) which allows a programmer to allocate memory in a fashion very similar to the standard malloc call.
-oneAPI then takes care of making sure the memory is allocated on the proper device and data read and written is moved from / to the device.  This is done with special calls to malloc_shared
-and a variation of free.  Both of these calls take additional arguments to indicate which device / context is being used for the memory allocation and free operations.  Universal shared
-memory is able to take advantage of memory that is shared by a CPU and integrated GPU to make execution faster.  If the device is a discrete GPU, then the GPU is informed of the
-memory allocation and data is transferred to/from the discrete GPU.
+Algorithm 6 has two variants.  The faster one utilizes Universal Shared Memory (USM), which allows a programmer to allocate memory in a fashion very similar to the standard malloc call.
+oneAPI then ensures the memory is allocated on the proper device and data read and written is moved from/to the device.  This is done with special calls to malloc_shared
+and a variation of free.  Both of these calls take additional arguments to indicate which device/context is used for the memory allocation and free operations.  Universal shared
+memory can take advantage of memory shared by a CPU and integrated GPU to make execution faster.  If the device is a discrete GPU, the GPU is informed of the
+memory allocation, and data is transferred to/from the discrete GPU.
 </p>
 
 <p>
-The second variant used malloc_device which specifically allocates memory space on the device.  Responsibility for moving data to/from the device rests with the programmer.
+The second variant used malloc_device, which specifically allocates memory space on the device.  Responsibility for moving data to/from the device rests with the programmer.
 </p>
 
 <p>
-The results below show a limitation of the use of variants in the framework.  Notice that the warmup time for the Device Memory variant seems to be shorter resulting in a higher
-FPS rate.  However, if the variants are run in the opposite order, then the USM warmup becomes faster.  Most likely this is due to the fact that the oneAPI compilation of
-all the kernels happens at the very beginning of the program and therefore factor into the first warmup period only.  This fact affects the "warmup" and "total averaging" rows, but
+The results below show a limitation of using variants in the framework.  Notice that the warmup time for the Device Memory variant seems to be shorter, resulting in a higher
+FPS rate.  However, if the variants run in the opposite order, the USM warmup becomes faster.  This is most likely because the oneAPI compilation of
+all the kernels happens at the beginning of the program and, therefore, factors into the first warmup period only.  This fact affects the "warmup" and "total averaging" rows but
 does not impact the validity of the "times averaging" rows.
 </p>
 
@@ -302,9 +302,9 @@ total averaging, 1001,                  Total,  0.00354516,s,     3.54516,ms,   
 <h2>Algorithms 7 and 8</h2>
 
 <p>
-The optimizations attempted in algorithms 7 and 8 decreased the frames per second.  They are included for completeness, but not discussed in depth since no speed-up was achieved.
+The optimizations attempted in algorithms 7 and 8 decreased the frames per second.  They are included for completeness but not discussed in depth since no speed-up was achieved.
 Algorithm 7 experimented with parallel_for_work_item and algorithm 8 used sub_groups.  It is
-unclear if these constructs are not well suited to this particular use case or if there is a more optimal way to configure the constructs.  See the results from the two runs below.
+unclear if these constructs are not well suited to this particular use case or if a more optimal way exists to configure them.  See the results from the two runs below.
 
 <code>
 <div class="ExecutionResults">
@@ -345,8 +345,8 @@ total averaging, 1001,                  Total,  0.00662780,s,     6.62780,ms,   
 <h2>Algorithm 9</h2>
 
 <p>
-Algorithm 9 enhances the ExtractFrameImage function relative to Algorithm 6.  Many of the previous uses of ExtractFrameImage relied on cv::remap to collect all of the pixel values
-into the rectilinear image.  Algorithm 8 replaces the remap function with a DPC++ parallel_for and computes all the pixel values using parallel processing.  Compared to Algorithm 6 this
+Algorithm 9 enhances the ExtractFrameImage function relative to Algorithm 6.  Many of the previous uses of ExtractFrameImage relied on cv::remap to collect all pixel values
+into the rectilinear image.  Algorithm 8 replaces the remap function with a DPC++ parallel_for and computes all the pixel values using parallel processing.  Compared to Algorithm 6, this
 results in a 2 times improvement (629.4278677 / 311.4885092).
 </p>
 
@@ -373,7 +373,7 @@ total averaging, 1001,                  Total,  0.00214898,s,     2.14898,ms,   
 <p>
 Algorithm 10 experiments with possibly sacrificing image quality in favor of speed.  If the frames come from a video stream, then perhaps sampling multiple pixels can be dropped.
 Thus, this algorithm simply takes the nearest top, left pixel to the compute pixel location.  Note that the computed pixel locations are floating point so they may not uniquely
-identify a particular pixel in the equirectangular image.  Simply truncating to integer and using that value as the pixel address, the calculations are nearly 50% faster
+identify a particular pixel in the equirectangular image.  Simply truncating to an integer and using that value as the pixel address, the calculations are nearly 50% faster
 (930.5499839 / 629.4278677 = 1.478) as shown below.
 </p>
 
@@ -396,7 +396,7 @@ total averaging, 1001,                  Total,  0.00168184,s,     1.68184,ms,   
 </code>
  
 <p>
-For a comparison of the output resulting from Algorithms 9 and 10 see Figure 1 and 2, respectively.
+For a comparison of the output resulting from Algorithms 9 and 10, see Figures 1 and 2, respectively.
 </p>
 
 <div class="Figure">
@@ -418,8 +418,8 @@ Figure 2: Output from Algorithm 10
 
 <p>
 The final code optimization utilizes the Universal Shared Memory, but when the target device is the CPU, the code does not make a memory copy and just points to the original image buffer.
-This boosts the FPS by about 3% (954.9373652 / 930.5499839 = 1.03) as shown below.  Given that each frame is being processed within 1 millisecond, finding additional improvement is becoming
-increasingly harder, but plesae comment if there are further enhancements to consider.
+This boosts the FPS by about 3% (954.9373652 / 930.5499839 = 1.03), as shown below.  Since each frame is being processed within 1 millisecond, finding additional improvement is becoming
+increasingly harder, but please comment if there are further enhancements to consider.
 </p>
 
 <code>
@@ -441,7 +441,7 @@ total averaging, 1001,                  Total,  0.00162270,s,     1.62270,ms,   
 </code>
 
 <p>
-Algorithm 11 excels when keeping the viewing direction static and changing the equirectangular frame.  As shown below, replacing the --deltaYaw with --deltaImage, results in
+Algorithm 11 excels when keeping the viewing direction static and changing the equirectangular frame.  As shown below, replacing the --deltaYaw with --deltaImage results in
 1607 FPS when extracting a rectilinear image.
 </p>
 
@@ -464,40 +464,40 @@ total averaging, 1001,                  Total,  0.00129327,s,     1.29327,ms,   
 </code>
 
 <p>
-The code implements algorithms 12 - 18 as well.  The algorithms 5 - 11 utilize floating point 64 (fp64) sized elements (double), but not all hardware supports fp64, so
+The code implements algorithms 12 - 18 as well.  Algorithms 5 - 11 utilize floating point 64 (fp64) sized elements (double), but not all hardware supports fp64, so
 algorithms 12 - 18 are identical to 5 - 11 except floating point 32 (fp32) sized elements (float) are used instead.  Neither fp64 nor fp32 operated significantly faster
-or slower than the other (generally plus or minus 1 or 2% of the other), thus, no need to discuss algorithms 12 - 18 further here beyond pointing out that
+or slower than the other (generally plus or minus 1 or 2% of the other); thus, algorithms 12 – 18 do not require further discussion beyond pointing out that
 if hardware being used does not support fp64, use the fp32 variant instead.
 </p>
 
 <p>
-Important: If the hardware does not support fp64, an exception may be thrown by the code along the lines of "Required aspect fp64 is not supported on the device".  If this occurs,
-converting the code to fp32 requires changing all double usage in the kernels to float.  However, that may not be enough.  There is also an extremely subtle situation where
-the use of numbers in the code (either hardcoded numerics like 2 or 0.5 in an equation or #defines) for computing a floating point number can also get cast to a double
-by the compiler.  In these cases make sure to denote they are floats (e.g., use 0.5f instead of just 0.5).  Unfortunately, no help is provided by the compiler in locating
-where the code is doing this so fixing it can be tedious.
+Important: If the hardware does not support fp64, the code may throw an exception like "Required aspect fp64 is not supported on the device".  If this occurs,
+converting the code to fp32 requires changing all usage of the double data type in the kernels to float.  However, that may not be enough.  There is also an extremely subtle situation where
+using numbers in the code (either hardcoded numerics like 2 or 0.5 in an equation or #defines) for computing a floating point number can also get cast to a double
+by the compiler.  In these cases, denote them as floats (e.g., use 0.5f instead of just 0.5).  Unfortunately, no help is provided by the compiler in locating
+where the code is doing this, so fixing it can be tedious.
 </p>
 
 <h2>Conclusion</h2>
 
 <p>
-After experimenting with 12 algorithms the code operates around 1700 times faster (1607.1695189 / 0.9273079 = 1,733.2 than the original C++ algorithm.  
+After experimenting with 12 algorithms, the code operates around 1700 times faster (1607.1695189 / 0.9273079 = 1,733.2) than the original C++ algorithm.  
 Key speedups reported on in this blog post include: 1) converting from serial to parallel processing, 2) reducing the number of kernels used to one, 3) replacing
 the cv::remap with DPC++ parallel algorithm, 4) simplified calculation of which pixel value to extract from the equirectangular image, and 5) keeping the
 viewing direction static while changing frames to extract.  If the viewing direction changes, then the code remains over 1000 times faster (954.9373652 / 0.9273079 = 1,029.8)
 than the original C++ algorithm and 80 times faster than Python (954.9373652 / 11.821199533998858 = 80.78).  Incidentally, the Python code can be modified
-to cache the viewing direction and runs around 150 FPS.  Algorithm 11 remains around 10 times faster than the Python code under these conditions (1607.1695189 / 150 = 10.7).
+to cache the viewing direction and executes around 150 FPS.  Algorithm 11 remains around 10 times faster than the Python code under these conditions (1607.1695189 / 150 = 10.7).
 </p>
 
 <p>
 At 1607 FPS, the code
-could potentially handle up to 50 video streams @ 30 FPS with an Intel&reg; Core i9 Gen 9 class processor.  Newer generations or more powerful computing classes
-such as Xeon processors could handle even more streams.  This is ideal for use cases such as Telesitting in hospital environments or video security
+could potentially handle up to 50 video streams @ 30 FPS with an Intel&reg; Core i9 Gen 9 class processor.  Newer generations or more powerful computing classes,
+such as Xeon processors, could handle even more streams.  This is ideal for use cases such as Telesitting in hospital environments or video security
 setups where a single computer monitors multiple cameras simultaneously.
 </p>
 
 <p>
-The next blog in this series explores the use of the integrated GPU when performing the algorithm.
+The next blog in this series explores using an integrated GPU when performing the algorithm.
 </p>
 
 <h2>
@@ -510,11 +510,21 @@ About the Author
 <img src="../images/author.jpg"></img>
 </td>
 <td>
-Doug Bogia received his Ph.D. in computer science from University of Illinois, Urbana-Champaign and currently works at Intel Corporation.
+Doug Bogia received his Ph.D. in computer science from the University of Illinois, Urbana-Champaign, and works at Intel Corporation.
 He enjoys photography, woodworking, programming, and optimizing solutions to run as fast as possible on a given piece of hardware.
 </td>
 </tr>
 </table>
+
+<a href=https://www.intel.com/LegalNoticesAndDisclaimers>Legal Notices and Disclaimers</a>
+
+<p>
+&copy; Intel Corporation.  Intel, the Intel logo, VTune, and other Intel marks are trademarks of Intel Corporation or its subsidiaries.  Other names and brands may be claimed as the property of others.
+</p>
+
+<p>
+The products described may contain design defects or errors known as errata which may cause the product to deviate from published specifications.  Current characterized errata are available on request.
+</p>
 
 </body>
 </head>
