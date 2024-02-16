@@ -32,7 +32,7 @@ Compilers exist for multiple vendors' hardware platforms, meaning that code writ
 Intel created the Intel&reg; oneAPI Base Toolkit (Base Kit), which embodies all the tools and libraries required to write in SYCL. Intel refers to the language as Data Parallel C++ (DPC++).
 The toolkit(s) are available for no fee from 
 <a href=https://www.intel.com/content/www/us/en/developer/tools/oneapi/toolkits.html>https://www.intel.com/content/www/us/en/developer/tools/oneapi/toolkits.html</a>.  The tool kit
-integrates into Microsoft Visual Studio and Eclipse IDE allowing developers to continue using those familiar development environments if desired.  The Base Toolkit includes the DPC++ compiler,
+integrates into Microsoft Visual Studio and Eclipse Integrated Development Environment (IDE) allowing developers to continue using those familiar development environments if desired.  The Base Toolkit includes the DPC++ compiler,
 Intel&reg; VTune&trade;, and Intel&reg; Advisor discussed previously in this series, as well as highly optimized libraries such as Math Kernel Library, Thread Building Blocks, and Video Processing Library, 
 in addition to many others.
 </p>
@@ -158,7 +158,7 @@ m_pQ</span><span class="sc0"> </span><span class="sc10">=</span><span class="sc0
 <h2>Introduction to parallel_for</h2>
 
 <p>
-Another key SYCL construct used by the code is parallel_for.  For instance, an example code loop from the original serial looks like the following.
+Another key SYCL construct used by the code is parallel_for.  For instance, an example code loop from the original serial implementation looks like the following.
 </p>
 
 <code>
@@ -211,7 +211,9 @@ in parallel with the code being executed by the SYCL device.
 <h2>Algorithm 5</h2>
 
 <p>
-The previous blog covered algorithms 0 through 4 and this blog covers algorithms 5 through 11.  Algorithm 5 started from Algorithm 1 (a port to C++ of the Python algorithm) and
+The previous blog covered algorithms 0 through 4 and this blog covers algorithms 5 through 11 and all are availabe in the GitHub repository
+<a href=https://github.com/intel-health/optimizing-equirectangular-conversion/tree/main/EquiRectangular/src/DPC%2B%2B-OneDevice>OneDevice</a>.
+Algorithm 5 started from Algorithm 1 (a port to C++ of the Python algorithm) and
 changed it to utilize parallel processing and select which hardware to target for executing the code using the constructs described above.  Once all the for loops were converted to parallel_for
 equivalents, algorithm 5 execution results in the following frames per second.
 </p>
@@ -483,7 +485,7 @@ where the code is doing this, so fixing it can be tedious.
 <p>
 After experimenting with 12 algorithms, the code operates around 1700 times faster (1607.1695189 / 0.9273079 = 1,733.2) than the original C++ algorithm.  
 Key speedups reported on in this blog post include: 1) converting from serial to parallel processing, 2) reducing the number of kernels used to one, 3) replacing
-the cv::remap with DPC++ parallel algorithm, 4) simplified calculation of which pixel value to extract from the equirectangular image, and 5) keeping the
+the cv::remap with a DPC++ parallel algorithm, 4) simplified calculation of which pixel value to extract from the equirectangular image, and 5) keeping the
 viewing direction static while changing frames to extract.  If the viewing direction changes, then the code remains over 1000 times faster (954.9373652 / 0.9273079 = 1,029.8)
 than the original C++ algorithm and 80 times faster than Python (954.9373652 / 11.821199533998858 = 80.78).  Incidentally, the Python code can be modified
 to cache the viewing direction and executes around 150 FPS.  Algorithm 11 remains around 10 times faster than the Python code under these conditions (1607.1695189 / 150 = 10.7).

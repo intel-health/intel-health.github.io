@@ -584,7 +584,7 @@ at 3.5 GigaOPS.  If the function could utilize more data from the L3 cache, it c
 </p>
 
 <div class="Figure">
-<img class="zoomable" src="Advisor-Alg1.jpg" style="max-width:100%"></img>
+<img class="zoomable" src="../images/Advisor-Alg1.jpg" style="max-width:100%"></img>
 <center>
 Figure 1: Intel&reg; Advisor Roofline for Algorithm 1 Debug Mode
 </center>
@@ -724,8 +724,8 @@ total averaging, 1001,                  Total,  0.00583647,s,     5.83647,ms,   
 <h2>Conclusion</h2>
 
 <p>
-This blog introduced a framework for exploring different optimization techniques and discussed ways to increase the frames per second throughput including: 
-1) porting an speedy algorithm from Python to C++ and saving the pixel addresses from frame to frame, 2) optimizing array accesses, 3) reducing computational load
+This blog introduced a framework for exploring different optimization techniques and discussed ways to increase the frames-per-second throughput including: 
+1) porting a speedy algorithm from Python to C++ and saving the pixel addresses from frame to frame, 2) optimizing array accesses, 3) reducing computational load
 by not calling the cv::Mat::at() function many times within a loop, and 4) combining separate loops into a single master loop.  The combined improvements resulted
 in moving from 0.9273079 FPS to 170.4878797 FPS for a 183 times improvement.
 </p>

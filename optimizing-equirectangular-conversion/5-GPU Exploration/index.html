@@ -282,7 +282,8 @@ to be a larger code change than originally expected.  The original hope was to s
 device and then wait() for either to complete, submit the next work to the device(s) that completed, and continue.  However, an Application Programming Interface (API) call to wait() for multiple queues
 simultaneously could not be found (please post a comment if there is one).  Therefore, the code was altered to run two standard C++ threads, and the primary thread
 doles out work to the sub-threads, and each sub-thread manages one of the two devices and thus can wait() without blocking the other thread's execution.  The main thread uses
-condition variables and mutexes to pass information back and forth between the three threads.  This code can be found in the TwoDevices solution.  Since TwoDevices depends on oneAPI / DPC++,
+condition variables and mutexes to pass information back and forth between the three threads.  This code can be found in the
+<a href="https://github.com/intel-health/optimizing-equirectangular-conversion/tree/main/EquiRectangular/src/DPC%2B%2B-TwoDevices">TwoDevices</a> solution.  Since TwoDevices depends on oneAPI / DPC++,
 thus, only algorithms 5 - 19 are supported (algorithm 19 is introduced later in this blog).
 </p>
 
@@ -407,7 +408,7 @@ Gigabyte Z690 ATX Alder Lake-S Desktop<br>
 Processor       12th Gen Intel&reg; Core&trade; i9-12900 2.40 GHz
 Installed RAM   128.0 GB (128 GB usable)<br>
 System Type     64-bit operating system, x64-based processor<br>
-Intel oneAPI Base Toolkit 2024.0
+Intel oneAPI Base Toolkit 2024.0<br>
 Microsoft Visual Studio 2022
 </p>
 
