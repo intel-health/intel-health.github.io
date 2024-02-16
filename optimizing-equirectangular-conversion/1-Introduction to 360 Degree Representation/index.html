@@ -318,7 +318,9 @@ Figure 10: Cubemap Labeled Faces
 <h2>Returning to the Equirectangular Format</h2>
 
 <p>
-The code in 360GeneratorV2.py takes each of the 6 faces found in Figure 10 and saves them in equirectangular format, which results in Figure 11.
+Using algorithm found in the CubemapConverter class from
+<a href="https://stackoverflow.com/questions/34250742/converting-a-cubemap-into-equirectangular-panorama">https://stackoverflow.com/questions/34250742/converting-a-cubemap-into-equirectangular-panorama</a>,
+a similar Python routine was created that takes each of the 6 faces found in Figure 10 and saves them in equirectangular format, which results in Figure 11.
 This shows how the mapping algorithm from 360 image coordinates to equirectangular coordinates does interesting things to how the data is captured in the final format and provides some
 insights into why the image in Figure 2 looks the way it does.
 <p>
