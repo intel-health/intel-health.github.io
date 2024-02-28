@@ -1,0 +1,46 @@
+<!-- Copyright (C) 2023 Intel Corporation -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
+<html>
+
+<head>
+  <title>
+    Blog series related to equirectangular to rectilinear conversion
+  </title>
+  <script type="text/javascript" src="Equirectangular.js"></script>
+  <script type="text/javascript" src="../common/MakeZoomable.js"></script>
+  <link rel="stylesheet" href="../common/BlogStyles.css">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-0ZRRCDXH88"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date()); 
+    gtag('config', 'G-0ZRRCDXH88'); 
+  </script>
+
+</head>
+
+<body>
+<p>
+This page indexes a series of five blogs related to converting equirectangular projection (also known as 360 degree images or panoramic) images to rectilinear images.
+
+<ul>
+<li><a href="https://intel-health.github.io/optimizing-equirectangular-conversion/1-Introduction%20to%20360%20Degree%20Representation/index.html">Introduction to 360-Degree Videos and Imaging</a>
+describes the equirectangular projection formats that are used and discusses how the 3D image is projected into a 2D image.
+</li>
+<li><a href="https://intel-health.github.io/optimizing-equirectangular-conversion/2-Existing%20360%20Degree%20Open%20Source/index.html">Existing Open Source for 360-Degree Projection</a>
+covers some existing open-source solutions that exist and assess the performance of each.
+</li>
+<li><a href="https://intel-health.github.io/optimizing-equirectangular-conversion/3-Framework%20and%20Optimizations/index.html">Execution Framework and Serial Code Optimizations</a>
+explores the use of Intel&reg; VTune and Advisor to create new open-source algorithm optimizations.
+</li>
+<li><a href="https://intel-health.github.io/optimizing-equirectangular-conversion/4-Parallel%20Optimizations/index.html">Execution Framework and Parallel Code Optimizations</a>
+discusses parallelization techniques made possible when using the freely available Intel&reg; oneAPI Base Toolkit (Base Kit) to accelerate the code further.
+</li>
+<li><a href=" https://intel-health.github.io/optimizing-equirectangular-conversion/5-GPU%20Exploration/index.html">GPU Exploration</a>
+wraps up showcasing a technique to run the algorithm on both the CPU and on the integrated GPU and addresses some complexities that come from this approach.</li>
+</ul>
+</p>
+</body>
+</html>
