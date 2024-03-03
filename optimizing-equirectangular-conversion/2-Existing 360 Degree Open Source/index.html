@@ -413,14 +413,14 @@ and limits the ability to have multiple instances pointing to different images o
 <li>
 The code operates extremely well with small images; however, when attempting to use it with a large panoramic image, this code fails with “Error code: Out of Memory”.
 </li>
-<ul>
+</ul>
 
 <h3>
 Enhanced JavaScript Option
 </h3>
 
 <p>
-Due to some of the above limitations, this code could not be used for this blog series, which lead to the creation a different JavaScript option.  The Apache-2 licensed code can be viewed
+Due to some of the above limitations, this code could not be used for this blog series, which led to the creation a different JavaScript option.  The Apache-2 licensed code can be viewed
 from
 <a href="https://intel-health.github.io/optimizing-equirectangular-conversion/1-Introduction%20to%20360%20Degree%20Representation/Equirectangular.js">https://intel-health.github.io/optimizing-equirectangular-conversion/1-Introduction%20to%20360%20Degree%20Representation/Equirectangular.js</a>.
 </p>
@@ -431,25 +431,26 @@ Loading the code requires adding the line:
 
 <code>
 <div class="CodeBlock"><span class="sc9">
-<script type="text/javascript" src="Equirectangular.js"></script>
+&lt;script type="text/javascript" src="Equirectangular.js"&gt;&lt;/script&gt;
 </span>
 </div>
 </code>
 
 <p>
-in the head region of an HTML page.  Next, in the body onLoad add a line similar to this:
+in the head region of an HTML page.  Next, make the body line appear similar to this:
 </p>
 
 <code>
 <div class="CodeBlock"><span class="sc9">
-<body onLoad="displayFlattened([['../images/IMG_20230629_082736_00_095.jpg', 'PhotoFlattenedImage', 'PhotoRawImage']])">
+<body onLoad="displayFlattened([['../images/IMG_20230629_082736_00_095.jpg', 'PhotoFlattenedImage', 'PhotoRawImage']])"&gt;
 </span>
 </div>
 </code>
 
 <p>
-The parameter is an array of arrays.  Each sub-array should have element 1: the URL for the image to load, 2: the canvas id where to place
-the flattened image, 3: the canvas id where to place the raw image.  Both canvases must exist on the web page, but the display state 
+The parameter to the function displayFlattened is an array of arrays to support multiple equirectangular images on one web page.  
+In each sub-array the first element provides the URL for the image to load, the second element contains the canvas id where to place
+the flattened image, and the third element has the canvas id where to place the raw image.  Both canvases must exist on the web page, but the display state 
 can be set to none for the canvas elements that should not be seen by the user.  By having both canvases, the web page can display either
 the rectilinear (flattened) view, the equirectangular (panoramic) view, or both.  The 
 <a href=https://intel-health.github.io/optimizing-equirectangular-conversion/1-Introduction%20to%20360%20Degree%20Representation/index.html>Introduction to 360-Degree Videos and Imaging</a>
@@ -464,9 +465,9 @@ used when calling the displayFlattened function.
 
 <code>
 <div class="CodeBlock"><span class="sc9">
-<canvas id="PhotoFlattenedImage" width="640" height="640" tabindex="1">
+&lt;canvas id="PhotoFlattenedImage" width="640" height="640" tabindex="1"&gt;
   Sorry, this browser does not support the HTML5 canvas element
-</canvas>
+&lt;/canvas&gt;
 </span>
 </div>
 </code>
