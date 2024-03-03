@@ -24,9 +24,10 @@
 <h1>Existing Open Source for 360-Degree Projection</h1>
 
 <p>
-With the understanding gained from the <a href=https://intel-health.github.io/optimizing-equirectangular-conversion/1-Introduction%20to%20360%20Degree%20Representation/index.html>Introduction to 360-Degree Videos and Imaging</a>, Open Source code can be found and evaluated for how well it supports converting equirectangular images 
-to rectilinear images and assessed on how well optimized the code appears to be. This installment in the blog series investigates several implementations and slightly modifies the 
-code to report how long each algorithm takes to extract a rectilinear image. 
+With the understanding gained from the <a href=https://intel-health.github.io/optimizing-equirectangular-conversion/1-Introduction%20to%20360%20Degree%20Representation/index.html>Introduction to 360-Degree Videos and Imaging</a>, 
+Open Source code can be found and evaluated for how well it supports converting equirectangular images 
+to rectilinear images and assessed on how optimized the code appears to be. This installment in the blog series investigates several implementations and slightly modifies the 
+code to report the length of time each algorithm takes to extract a rectilinear image. 
 </p>
 
 <p>
@@ -41,13 +42,13 @@ optimized solution where one server can keep up with many inbound streams is par
 </p>
 
 <p>
-The basic steps taken by the algorithms include the following for each pixel in the rectilinear image:
+The basic steps taken by the algorithms include the following steps for each pixel in the rectilinear image:
 </p>
 
 <ul>
 <li>Map the rectilinear coordinate to the equivalent spherical coordinate</li>
 <li>Rotate the spherical coordinate by the desired yaw, tilt, and roll degrees</li>
-<li>Convert back to latitude and longitude coordinates for getting the pixel information from the equirectangular image</li>
+<li>Convert back to latitude and longitude coordinates for getting the pixel information from the equirectangular projection image</li>
 </ul>
 
 <h2>
@@ -55,23 +56,23 @@ Open Source C++ Code
 </h2>
 
 <p>
-The first code considered originates from <a href=https://github.com/rfn123/equirectangular-to-rectlinear/tree/master>https://github.com/rfn123/equirectangular-to-rectlinear/tree/master</a>. The author notes that the code is not optimized to be efficient, 
-but has a nice explanation for the algorithm that is used and references a book for further details.  This code base was forked into 
+The first code considered originates from <a href=https://github.com/rfn123/equirectangular-to-rectlinear/tree/master>https://github.com/rfn123/equirectangular-to-rectlinear/tree/master</a>. 
+The author, rfn123, notes that the code intends to assist in understanding the theory rather than producing highly efficient code. 
+The README provides a nice explanation for the algorithm implementation and references a book for further details.  This code base was forked into 
 <a href=https://github.com/intel-health/equirectangular-to-rectlinear>https://github.com/intel-health/equirectangular-to-rectlinear</a> to add the code
-to report timing information.  The code was modified to remove the YAML configuration and simply select some known
-values to reduce dependencies on YAML.
+to report timing information.  The fork also removes the YAML configuration to reduce dependencies on other code and selects some known values.
 </p>
 
 <p>
 The package includes a sample 360 image to use when testing, but for this blog series, all code was minimally altered to use the same images for consistency. The two selected 
 images are shown in Figure 1 and Figure 13 from the initial blog post. The Equirectangular to Rectilinear code depends on OpenCV for reading and writing image files and 
-some operations. The code also has a dependency on libyaml-cpp-dev since the configuration file uses YAML to define all the desired parameters, such as pan, roll, and 
+some additional operations. The original code also has a dependency on libyaml-cpp-dev since the configuration file uses YAML to define all the desired parameters, such as pan, roll, and 
 tilt angles; however, the core algorithm does not require YAML so it can be reused elsewhere without the YMAL dependency. The framework introduced later in this series leverages 
 that to incorporate this algorithm alongside other options. 
 </p>
 
 <p>
-The source code uses cmake, which reduces effort in porting to different environments. After going through the steps described in the ReadMe.md file, the code runs great and produces 
+The source code uses cmake, which reduces effort in porting to different environments. After going through the steps described in the README.md file, the code runs great and produces 
 the expected output. 
 </p>
 
@@ -81,7 +82,7 @@ Instrumenting the C++ Code to Capture Performance Numbers
 
 <p>
 While the original author's goal concentrated on obtaining a rectilinear image and not on efficiency, the work described in this blog series attempts to produce 
-rectilinear images efficiently. Determining the efficiency of different algorithms requires a metric to assess the speed of each. Minor modifications were made to 
+rectilinear images efficiently. Determining the efficiency of different algorithms requires a metric to assess the speed of each. Two minor modifications were made to 
 the code base. The first modification adds the chrono include at the top of the Equi2Rect.cpp file.
 </p>
 
@@ -120,12 +121,12 @@ Results from Running the C++ Code
 <p>
 The box below shows the results from running the code on an Intel&reg; i9-9900k machine configured with:<br>
 <br>
-Gigabyte Desktop Board Z390 Aorus Ultra<br>
+Gigabyte* Desktop Board Z390 Aorus Ultra<br>
 Processor       Intel(R) Core(TM) i9-9900K CPU @ 3.60GHz<br>
 Installed RAM   16.0 GB (15.9 GB usable)<br>
 System Type     64-bit operating system, x64-based processor<br>
 Intel oneAPI Base Toolkit 2023.2<br>
-Microsoft Visual Studio 2022
+Microsoft* Visual Studio 2022
 </p>
 
 <p>
@@ -212,7 +213,7 @@ Results from Running the Python Code
 
 <p>
 The box below shows the results from running the code on the same Intel&reg; i9-9900k machine as before.  Two different Python execution environments were run.  First is the standard
-distribution of Python.  For the second, Intel maintains a distribution of Python that is optimized for Intel hardware available at 
+distribution of Python.  For the second, Intel maintains a distribution of Python that is optimized for Intel hardware available for free at 
 <a href=https://www.intel.com/content/www/us/en/developer/tools/oneapi/distribution-for-python.html>https://www.intel.com/content/www/us/en/developer/tools/oneapi/distribution-for-python.html</a>.
 This distribution has optimizations for accelerating core numerical packages, and it can extend numerical capabilities to other accelerators, such as a GPU.  However, for this
 particular code, there is not a significant difference in the performance, most likely because this code relies more on the OpenCV infrastructure rather than
@@ -275,16 +276,28 @@ Figure 2: VTune Configuration to Run the Python Program
 </div>
 
 <p>
-For both VTune runs, the Hotspots profiling mode was selected and along with hardware event sampling.  This provides deeper insights into the code execution; however, it does require running VTune
+For both VTune runs, the Hotspots profiling mode was selected using hardware event sampling.  This provides deeper insights into the code execution; however, it does require running VTune
 (or Visual Studio) with Administrator privileges.
 </p>
 
 <p>
 After executing and closing the program, VTune crunches all the information it has collected and presents various options for displaying it. In Figures 3 and 4, the Platform
 option was selected, and, as seen in the figures, VTune shows the number of operating threads and what portion of the code ran within each thread.  In this case, both programs 
-executed for 10 iterations which provides enough data for VTune to sample for trends.  The initial zoom level provides a nice overview of the patterns of code execution. Still, it requires zooming in or hovering over the individual boxes to learn which method is represented by each box.  However, even at this level of granularity the VTune plot for the Python
-code shows that twelve threads execute over the application's lifetime and the brown regions show where each thread utilizes the CPU.  Whereas the C++ code mostly uses one thread
-for most of the execution.
+executed for 10 iterations which provides enough data for VTune to sample for trends.  The initial zoom level provides a nice overview of the patterns of code execution. 
+VTune also allows zooming in or hovering over the individual boxes to learn which method is represented by each box.  However, even at this level of granularity the VTune plot for the Python
+code shows that twelve threads execute over the application's lifetime.  The green areas represent times where the thread was running and the brown regions show where each thread utilizes the CPU.
+</p>
+
+<p>
+The purple box in each figure represents the call to OpenCV's imread where the code loads the image to process.  Note the scale along the top
+shows that in both cases the read takes around 1 second, they appear to be different sizes since the C++ graph takes 25 seconds while the
+Python graph completes in about 2 seconds.
+</p>
+
+<p> 
+To the right of the purple box represents the processing effort to extract the rectilinear image ten times.  As shown in Figure 3, the C++ code utilizes a single thread, whereas, Figure 4 shows
+that the Python code distributes the work across eight threads. Ten brown spikes are visible for when each of those threads processes one of the ten 
+rectilinear extractions.
 </p>
 
 <div class="Figure">
@@ -305,7 +318,7 @@ Figure 4: VTune Platform View of Python Program
 VTune enables a developer to zoom in on any portion of the execution to get more details on what code ran at any point in time.  In Figure 5, the zoom level illustrates the individual
 OpenCV method calls made by the C++ code over a duration of about 17.5 microseconds.  The tooltip shows that the method under the mouse cursor is the call to cv2.inv().  By
 hovering over each of the other function calls, VTune showcases that the code calls cv2's inv, then invert, gemm64f (a method to multiple 
-matrices), norm (to normalize the xyz matrix), multiply (the green box which multiples the matrices), and finally gemm64f before the cycle repeats.  The tooltip also shows the duration
+matrices), norm (to normalize the xyz matrix), multiply (shown by the green box, which multiples the matrices), and finally gemm64f before the cycle repeats.  The tooltip also shows the duration
 of each method call.  For example, cv::Mat::inv executes for 200ns.  The gemm64f tends to execute for around 1.5 microseconds, and cv::norm runs around 2.8 microseconds.  While
 each call does not take a long time, it adds up quickly since these calls occur often as described in the summary page below.
 </p>
@@ -345,8 +358,8 @@ Figure 6: VTune Summary Page for the C++ Program
 <p>
 After inspecting the rest of the code, it becomes clear that Rot, K, and K.inv do not change over the call duration to bilinear_interpolation.  Thus, the code can be
 optimized by computing Rot * K.inv() a single time (for example, in the constructor) and caching it for use in the reprojection method.  Figure 7 shows the VTune summary
-of a code execution after caching. The results from running 100 iterations of the changed code, shown below, indicate the altered code executes about twice as fast, but
-still slower than the Python code.  The speed-up comes from not making the extraneous calls to gemm64f, inv, and invert.
+of a code execution after caching. The results from running 100 iterations of the changed code, shown below, indicate the altered code executes about twice as fast
+(1.77149091 / 0.89846216 = 1.97), but still slower than the Python code.  The speed-up comes from not making the extraneous calls to gemm64f, inv, and invert.
 </p>
 
 <code>
@@ -368,6 +381,95 @@ still slower than the Python code.  The speed-up comes from not making the extra
 Figure 7: VTune Summary Page for the C++ Program
 </center>
 </div>
+
+<h2>
+Open Source Javascript Code
+</h2>
+
+<p>
+</p>
+
+<h3>
+Javascript Option
+</h3>
+
+The site <a href="https://www.cheetah3d.com/download/HTML5pano/">https://www.cheetah3d.com/download/HTML5pano/</a> contains an HTML5 JavaScript panorama viewer released with a 2-Clause
+BSD license (<a href="https://opensource.org/license/bsd-2-clause">https://opensource.org/license/bsd-2-clause</a>.
+
+As mentioned on the web page, an Info panel can be enabled with the I key and reports on the frames per second it takes to move around the sample image.  The algorithm appears to be
+more efficient than the previous one.  However, there are some differences worth noting also.
+
+<ul>
+<li>
+No interaction currently exists to change the roll of the camera.  This works well if the original image represents the desired roll angle.
+</li>
+<li>
+Mouse operations adjust the camera orientation, so the scene moves in the opposite direction of the mouse movement.  
+While this works, many other applications such as Maps behave differently.  In those, if the mouse moves to the left, the map does as well.</li>
+<li>
+The JavaScript hardcodes the image file to load rather than accepting it as a parameter.  This requires altering the JavaScript program for different image names
+and limits the ability to have multiple instances pointing to different images on the same web page.
+</li>
+<li>
+The code operates extremely well with small images; however, when attempting to use it with a large panoramic image, this code fails with “Error code: Out of Memory”.
+</li>
+<ul>
+
+<h3>
+Enhanced JavaScript Option
+</h3>
+
+<p>
+Due to some of the above limitations, this code could not be used for this blog series, which lead to the creation a different JavaScript option.  The Apache-2 licensed code can be viewed
+from
+<a href="https://intel-health.github.io/optimizing-equirectangular-conversion/1-Introduction%20to%20360%20Degree%20Representation/Equirectangular.js">https://intel-health.github.io/optimizing-equirectangular-conversion/1-Introduction%20to%20360%20Degree%20Representation/Equirectangular.js</a>.
+</p>
+
+<p>
+Loading the code requires adding the line:
+</p>
+
+<code>
+<div class="CodeBlock"><span class="sc9">
+<script type="text/javascript" src="Equirectangular.js"></script>
+</span>
+</div>
+</code>
+
+<p>
+in the head region of an HTML page.  Next, in the body onLoad add a line similar to this:
+</p>
+
+<code>
+<div class="CodeBlock"><span class="sc9">
+<body onLoad="displayFlattened([['../images/IMG_20230629_082736_00_095.jpg', 'PhotoFlattenedImage', 'PhotoRawImage']])">
+</span>
+</div>
+</code>
+
+<p>
+The parameter is an array of arrays.  Each sub-array should have element 1: the URL for the image to load, 2: the canvas id where to place
+the flattened image, 3: the canvas id where to place the raw image.  Both canvases must exist on the web page, but the display state 
+can be set to none for the canvas elements that should not be seen by the user.  By having both canvases, the web page can display either
+the rectilinear (flattened) view, the equirectangular (panoramic) view, or both.  The 
+<a href=https://intel-health.github.io/optimizing-equirectangular-conversion/1-Introduction%20to%20360%20Degree%20Representation/index.html>Introduction to 360-Degree Videos and Imaging</a>
+loads multiple equirectangular images and in some cases shows both views and, in some cases only, shows the rectilinear view.  Use the View Page Source
+option to see all the details of how the Introduction web page was constructed.
+</p>
+
+<p>
+Finally, on the web page create the canvas(es) to display the image(s) using HTML similar to the following and ensure the canvas id matches the id
+used when calling the displayFlattened function.
+</p>
+
+<code>
+<div class="CodeBlock"><span class="sc9">
+<canvas id="PhotoFlattenedImage" width="640" height="640" tabindex="1">
+  Sorry, this browser does not support the HTML5 canvas element
+</canvas>
+</span>
+</div>
+</code>
 
 <h2>
 Conclusion
