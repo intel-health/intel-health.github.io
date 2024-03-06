@@ -412,16 +412,21 @@ layout.
 </p>
 
 <div class="Figure">
-<img class="zoomable" src="../images/Advisor-Alg1.jpg" style="max-width:100%"></img>
+<img class="zoomable" src="../images/VTune-OneDevice-Alg1-Image-Zoom.jpg" style="max-width:100%"></img>
 <center>
 Figure 1: Intel&reg; VTune Display for Algorithm 1 Release Mode
 </center>
 </div>
 
 <p>
-For clarity and to allow disabling of VTune calls entirely, #ifdef VTUNE_API/#endif pairs surround the VTune calls.  Thus, for a full understanding of using VTune labeling,
-search the code base for VTUNE_API.  As a brief introduction, VTune requires a domain and one or more labels.  In the code snippets below, the first group creates a
-global variable to contain the domain.  This can be defined in the primary code file.  The second snippet assumes it exists in another c++ code file so it uses the
+For clarity and to allow disabling of VTune calls entirely, <b>#ifdef VTUNE_API</b> and <b>#endif</b> pairs surround the VTune calls.  Thus, for a full understanding of using VTune labeling,
+search the code base for VTUNE_API.  As a brief introduction, VTune requires a domain and one or more labels.  In the code snippets below, the first group of code creates a
+global variable to contain the domain.  This can be defined in the primary code file.  The comments describe additional steps that must be taken to configure the
+Visual Studio project to access VTune's include and library files.  Change VTUNE_PROFILER_2023_DIR to correspond to whichever version you installed. 
+</p>
+
+<p>
+The second snippet assumes it exists in another c++ code file so it uses the
 extern keyword on the domain to have access to that variable.  In a very simple project where there is only one file, the two code snippets could be merged and
 the extern line would be dropped.  The second snippet creates the label strings that were used in Figure 1.  Create as many labels as are required to track code regions
 of interest.
