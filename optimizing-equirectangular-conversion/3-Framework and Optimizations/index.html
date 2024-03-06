@@ -395,6 +395,84 @@ total averaging, 1001,                  Total,  0.01679729,s,    16.79729,ms,   
 </div>
 </code>
 
+<h3>VTune Assessment</h3>
+
+<p>
+As introduced in the previous blog, Intel&reg; VTune Profiler assists developers in visualizing code behavior and execution duration of functions.
+The code framework takes advantage of a very useful feature of VTune where labels can be included in the to identify regions of interest in the code (e.g., to
+delineate part of the code that might be inefficient or compare two code regions to determine which takes more time to execute).  
+</p>
+
+<p>
+Figure 1 shows a zoomed in view of two frame extractions.  By identifying the code that does the Frame Calculations and another section that does the Frame Extraction,
+VTune displays these regions in its output (i.e., the purple and pink labels in the top thread).  This makes it easy to see the relative difference in time it takes
+for each region of code.  Hovering over the labels pops up a tool tip that informs the user the amount of execution time.  VTune provides further evidence that the
+frame extraction takes around 2.8 ms to complete, which corresponds closely with the 2.88 reported as the average time for Frame Calculations with the row/column memory
+layout.
+</p>
+
+<div class="Figure">
+<img class="zoomable" src="../images/Advisor-Alg1.jpg" style="max-width:100%"></img>
+<center>
+Figure 1: Intel&reg; VTune Display for Algorithm 1 Release Mode
+</center>
+</div>
+
+<p>
+For clarity and to allow disabling of VTune calls entirely, #ifdef VTUNE_API/#endif pairs surround the VTune calls.  Thus, for a full understanding of using VTune labeling,
+search the code base for VTUNE_API.  As a brief introduction, VTune requires a domain and one or more labels.  In the code snippets below, the first group creates a
+global variable to contain the domain.  This can be defined in the primary code file.  The second snippet assumes it exists in another c++ code file so it uses the
+extern keyword on the domain to have access to that variable.  In a very simple project where there is only one file, the two code snippets could be merged and
+the extern line would be dropped.  The second snippet creates the label strings that were used in Figure 1.  Create as many labels as are required to track code regions
+of interest.
+</p>
+
+<code>
+<div class="CodeBlock">
+<span class="sc9">#ifdef VTUNE_API
+</span><span class="sc2">// Assuming you have 2023 of VTune installed, you will need to add
+// $(VTUNE_PROFILER_2023_DIR)\sdk\include
+// to the include directories for any configurations that will be profiled.  Also add
+// $(VTUNE_PROFILER_2023_DIR)\sdk\lib64
+// to the linker additional directories area
+</span><span class="sc9">#include "ittnotify.h"
+#pragma comment(lib, "libittnotify.lib")
+</span><span class="sc11">__itt_domain</span><span class="sc10">*</span><span class="sc0"> </span><span class="sc11">pittTests_domain</span><span class="sc0"> </span><span class="sc10">=</span><span class="sc0"> </span><span class="sc11">__itt_domain_createA</span><span class="sc10">(</span><span class="sc6">"localDomain"</span><span class="sc10">);</span><span class="sc0">
+</span><span class="sc9">#endif
+</span><span class="sc0">
+</span><span class="sc9">#ifdef VTUNE_API
+#include "ittnotify.h"
+#pragma comment(lib, "libittnotify.lib")
+</span><span class="sc16">extern</span><span class="sc0"> </span><span class="sc11">__itt_domain</span><span class="sc0"> </span><span class="sc10">*</span><span class="sc11">pittTests_domain</span><span class="sc10">;</span><span class="sc0">
+</span><span class="sc2">// Create string handle for denoting when the kernel is running
+</span><span class="sc16">wchar_t</span><span class="sc0"> </span><span class="sc16">const</span><span class="sc0"> </span><span class="sc10">*</span><span class="sc11">pSerialRemappingV1aExtract</span><span class="sc0"> </span><span class="sc10">=</span><span class="sc0"> </span><span class="sc11">_T</span><span class="sc10">(</span><span class="sc6">"SerialRemappingV1a Extract Kernel"</span><span class="sc10">);</span><span class="sc0">
+</span><span class="sc11">__itt_string_handle</span><span class="sc0"> </span><span class="sc10">*</span><span class="sc11">handle_SerialRemappingV1a_extract_kernel</span><span class="sc0"> </span><span class="sc10">=</span><span class="sc0"> </span><span class="sc11">__itt_string_handle_create</span><span class="sc10">(</span><span class="sc11">pSerialRemappingV1aExtract</span><span class="sc10">);</span><span class="sc0">
+</span><span class="sc16">wchar_t</span><span class="sc0"> </span><span class="sc16">const</span><span class="sc0"> </span><span class="sc10">*</span><span class="sc11">pSerialRemappingV1aCalc</span><span class="sc0"> </span><span class="sc10">=</span><span class="sc0"> </span><span class="sc11">_T</span><span class="sc10">(</span><span class="sc6">"SerialRemappingV1a Calc Kernel"</span><span class="sc10">);</span><span class="sc0">
+</span><span class="sc11">__itt_string_handle</span><span class="sc0"> </span><span class="sc10">*</span><span class="sc11">handle_SerialRemappingV1a_calc_kernel</span><span class="sc0"> </span><span class="sc10">=</span><span class="sc0"> </span><span class="sc11">__itt_string_handle_create</span><span class="sc10">(</span><span class="sc11">pSerialRemappingV1aCalc</span><span class="sc10">);</span><span class="sc0">
+</span><span class="sc9">#endif
+</span></div>
+</code>
+
+<p>
+Finally, surround the code segments of interest with __itt_task_begin and __itt_task_end calls as shown below.
+</p>
+
+<code>
+<div class="CodeBlock">
+<span class="sc9">#ifdef VTUNE_API
+</span><span class="sc0">    </span><span class="sc11">__itt_task_begin</span><span class="sc10">(</span><span class="sc11">pittTests_domain</span><span class="sc10">,</span><span class="sc0"> </span><span class="sc11">__itt_null</span><span class="sc10">,</span><span class="sc0"> </span><span class="sc11">__itt_null</span><span class="sc10">,</span><span class="sc0"> </span><span class="sc11">handle_SerialRemappingV1a_extract_kernel</span><span class="sc10">);</span><span class="sc0">
+</span><span class="sc9">#endif
+</span><span class="sc0">
+</span><span class="sc2">// Code to be identified by VTune with the given label goes here
+</span><span class="sc0">
+</span><span class="sc9">#ifdef VTUNE_API
+</span><span class="sc0">    </span><span class="sc11">__itt_task_end</span><span class="sc10">(</span><span class="sc11">pittTests_domain</span><span class="sc10">);</span><span class="sc0">
+</span><span class="sc9">#endif
+</span></div>
+</code>
+
+<h3>Algorithm 1 with Constant Viewing Direction</h3>
+
 <p>
 Since Algorithm 1 pre-computes and stores the pixel address information for a given viewing direction, this information can substantially accelerate image
 extraction for subsequent frames if the viewing direction does not change.  For instance, if the underlying frames come from a video or a person is
@@ -565,7 +643,7 @@ Regardless of the selected download option, the tool is free.
 </p>
 
 <p>
-Figure 1 below shows a screen capture from Advisor after profiling Algorithm 1 in Debug Mode.  The upper part of the figure contains the Roofline analysis.  Three regions are shown in 
+Figure 2 below shows a screen capture from Advisor after profiling Algorithm 1 in Debug Mode.  The upper part of the figure contains the Roofline analysis.  Three regions are shown in 
 shades of pink: 1) Memory-bound functions and loops on the left, 2) Bound by computer and memory roofs in the center, and 3) Compute bound on the right.  Functions and loops falling in the Memory
 region are throttled due to requiring memory access, and the CPU remains capable of processing more data than can be provided by the memory accesses.  The central zone shows functions that may be
 capped by memory accesses or by compute speed depending on which memory type of memory is being accessed (DRAM, Level 1, Level 2, or Level 3 cache) and which instruction sets are being utilized
@@ -594,7 +672,7 @@ at 3.5 GigaOPS.  If the function could utilize more data from the L3 cache, it c
 <div class="Figure">
 <img class="zoomable" src="../images/Advisor-Alg1.jpg" style="max-width:100%"></img>
 <center>
-Figure 1: Intel&reg; Advisor Roofline for Algorithm 1 Debug Mode
+Figure 2: Intel&reg; Advisor Roofline for Algorithm 1 Debug Mode
 </center>
 </div>
 
