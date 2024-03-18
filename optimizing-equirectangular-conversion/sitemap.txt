@@ -1,0 +1,5 @@
+https://intel-health.github.io/optimizing-equirectangular-conversion/1-Introduction%20to%20360%20Degree%20Representation/index.html
+https://intel-health.github.io/optimizing-equirectangular-conversion/2-Existing%20360%20Degree%20Open%20Source/index.html
+https://intel-health.github.io/optimizing-equirectangular-conversion/3-Framework%20and%20Optimizations/index.html
+https://intel-health.github.io/optimizing-equirectangular-conversion/4-Parallel%20Optimizations/index.html
+https://intel-health.github.io/optimizing-equirectangular-conversion/5-GPU%20Exploration/index.html
